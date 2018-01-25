@@ -1,10 +1,14 @@
 ---
 title: "Trailer recommendations exploration"
-output: html_notebook
+author: "Gaurav Modi"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output: pdf_document
 ---
 
 ```{r setup, echo=FALSE}
+suppressPackageStartupMessages({
 library(tidyverse)
+})
 ```
 
 This dataset was created by Eva Zhong, based on a movielens experiment 
@@ -28,27 +32,61 @@ trailer_activities <- readr::read_csv("trailer_activities.csv",
 trailer_activities
 ```
 
-## task: make a histogram
+## Histogram of `count_total_played`
 
-* plot a histogram of `count_total_played` using `geom_histogram`
-* try setting `binwidth` in geom_histogram
-* try adding `coord_cartesian(xlim = c(0, 20))` (or, try using a ylim)
+```{r}
+g <- ggplot(data = trailer_activities)
+```
 
 
-## task: make scatter plots
+```{r}
+p1 <- g + geom_histogram(mapping = aes(x = count_total_played), binwidth = 5) +
+  coord_cartesian(xlim = c(0, 20))
 
-Plot the relationship between `count_total_played` and `count_rec_played` using:
+p1
+```
 
-* geom_point (try setting `alpha=0.1`)
+## Scatter plots
+
+The relationship between `count_total_played` and `count_rec_played` using:
+
+* geom_point (setting `alpha=0.1`)
+
+```{r}
+p2 <- g + geom_point(mapping = aes(x = count_total_played, y = count_rec_played), alpha = 0.1)
+
+p2
+```
+
 * geom_jitter
+
+```{r}
+p3 <- g + geom_jitter(mapping = aes(x = count_total_played, y = count_rec_played))
+
+p3
+```
+
 * geom_count
 
-Also:
+```{r}
+p4 <- g + geom_count(mapping = aes(x = count_total_played, y = count_rec_played))
 
-* use a `facet_wrap` to split the chart by algorithm
+p4
+```
 
 
-## summary stats
+* a `facet_wrap` to split the chart by algorithm
+
+```{r}
+p5 <- g + geom_point(mapping = aes(x = count_total_played, y = count_rec_played)) + 
+  geom_smooth(mapping = aes(x = count_total_played, y = count_rec_played)) +
+  coord_cartesian(xlim = c(0, 50)) +
+  facet_wrap( ~ Algorithm)
+
+p5
+```
+
+## Summary Statistics
 
 Here are aggregate stats of recommended play actions, grouped by algorithm:
 
@@ -66,11 +104,34 @@ trailer_activities_summary
 ```
 
 
-## task: make a bar chart!
+## Bar chart!
 
 Are the number of observations balanced between the four experimental algorithms?
 Build a bar chart of this tibble by Algorithm.
 
-* use `geom_col`, charting Algorithm by mean_rec_played
-* try adding another geom: `geom_errorbar(aes(ymin = mean_rec_played - std_err_rec_played, ymax = mean_rec_played + std_err_rec_played))`
+```{r}
+g1 <- ggplot(data = trailer_activities_summary)
+
+p6 <- g1 + geom_bar(mapping = aes(x = Algorithm, y = total_played), stat = "identity")
+
+p6
+```
+
+* Charting Algorithm by mean_rec_played
+
+```{r}
+p7 <- g1 + geom_bar(mapping = aes(x = Algorithm, y = mean_rec_played), stat = "identity")
+
+p7
+```
+
+
+* Standard error plot for each algorithm
+
+```{r}
+p8 <- g1 + geom_errorbar(aes(x = Algorithm, ymin = mean_rec_played - std_err_rec_played, ymax = mean_rec_played + std_err_rec_played))
+
+p8
+```
+
     
